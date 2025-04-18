@@ -1,6 +1,7 @@
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -47,6 +48,21 @@ class SalaryCalculator {
     }
 }
 
+class EmploymentDurationCalculator {
+    public static int calculateMonthsWorkedInCurrentYear(LocalDate joinDate, LocalDate currentDate) {
+        if (joinDate.getYear() == currentDate.getYear()) {
+            // Jika bergabung di tahun yang sama, hitung selisih bulan
+            return (int)ChronoUnit.MONTHS.between(joinDate.withDayOfMonth(1), currentDate.withDayOfMonth(1)) + 1;
+        } else if (joinDate.getYear() < currentDate.getYear()) {
+            // Jika bergabung sebelum tahun ini, sudah bekerja 12 bulan penuh
+            return 12;
+        } else {
+            // Jika joinDate di masa depan (tidak mungkin), return 0
+            return 0;
+        }
+    }
+}
+
 public class Employee {
 
 	private String employeeId;
@@ -55,10 +71,10 @@ public class Employee {
 	private String idNumber;
 	private String address;
 	
-	private int yearJoined;
-	private int monthJoined;
-	private int dayJoined;
+	private LocalDate joinDate;
 	private int monthWorkingInYear;
+	
+	
 	
 	private boolean isForeigner;
     private Gender gender; 
@@ -79,9 +95,7 @@ public class Employee {
 		this.lastName = lastName;
 		this.idNumber = idNumber;
 		this.address = address;
-		this.yearJoined = yearJoined;
-		this.monthJoined = monthJoined;
-		this.dayJoined = dayJoined;
+		this.joinDate = joinDate;
 		this.isForeigner = isForeigner;
 		this.gender = gender;
 		
@@ -117,19 +131,10 @@ public class Employee {
 	}
 	
 	public int getAnnualIncomeTax() {
-		
-		//Menghitung berapa lama pegawai bekerja dalam setahun ini, jika pegawai sudah bekerja dari tahun sebelumnya maka otomatis dianggap 12 bulan.
-		LocalDate date = LocalDate.now();
-		
-		if (date.getYear() == yearJoined) {
-			monthWorkingInYear = date.getMonthValue() - monthJoined;
-		}else {
-			monthWorkingInYear = 12;
-		}
-		
-		return TaxFunction.calculateTax(monthlySalary, otherMonthlyIncome, monthWorkingInYear, annualDeductible, spouseIdNumber.equals(""), childIdNumbers.size());
-
-	}
+        LocalDate currentDate = LocalDate.now();
+        this.monthWorkingInYear = EmploymentDurationCalculator.calculateMonthsWorkedInCurrentYear(joinDate, currentDate);
+        return TaxFunction.calculateTax(monthlySalary, otherMonthlyIncome, monthWorkingInYear, annualDeductible, spouseIdNumber.equals(""), childIdNumbers.size());
+    }
 
 	public Gender getGender() {
         return gender;
@@ -137,5 +142,9 @@ public class Employee {
 
 	public int getMonthlySalary() {
         return monthlySalary;
+    }
+
+	public LocalDate getJoinDate() {
+        return joinDate;
     }
 }
