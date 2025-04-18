@@ -19,6 +19,34 @@ enum Gender {
     }
 }
 
+class SalaryCalculator {
+    // Constants for salary grades
+    private static final int GRADE_1_SALARY = 3_000_000;
+    private static final int GRADE_2_SALARY = 5_000_000;
+    private static final int GRADE_3_SALARY = 7_000_000;
+    private static final double FOREIGNER_SALARY_MULTIPLIER = 1.5;
+
+    public static int calculateSalary(int grade, boolean isForeigner) {
+        int baseSalary;
+        
+        switch (grade) {
+            case 1:
+                baseSalary = GRADE_1_SALARY;
+                break;
+            case 2:
+                baseSalary = GRADE_2_SALARY;
+                break;
+            case 3:
+                baseSalary = GRADE_3_SALARY;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid grade: " + grade);
+        }
+        
+        return isForeigner ? (int)(baseSalary * FOREIGNER_SALARY_MULTIPLIER) : baseSalary;
+    }
+}
+
 public class Employee {
 
 	private String employeeId;
@@ -66,24 +94,9 @@ public class Employee {
 	 * Jika pegawai adalah warga negara asing gaji bulanan diperbesar sebanyak 50%
 	 */
 	
-	public void setMonthlySalary(int grade) {	
-		if (grade == 1) {
-			monthlySalary = 3000000;
-			if (isForeigner) {
-				monthlySalary = (int) (3000000 * 1.5);
-			}
-		}else if (grade == 2) {
-			monthlySalary = 5000000;
-			if (isForeigner) {
-				monthlySalary = (int) (3000000 * 1.5);
-			}
-		}else if (grade == 3) {
-			monthlySalary = 7000000;
-			if (isForeigner) {
-				monthlySalary = (int) (3000000 * 1.5);
-			}
-		}
-	}
+	public void setMonthlySalary(int grade) {    
+        this.monthlySalary = SalaryCalculator.calculateSalary(grade, isForeigner);
+    }
 	
 	public void setAnnualDeductible(int deductible) {	
 		this.annualDeductible = deductible;
@@ -117,8 +130,12 @@ public class Employee {
 		return TaxFunction.calculateTax(monthlySalary, otherMonthlyIncome, monthWorkingInYear, annualDeductible, spouseIdNumber.equals(""), childIdNumbers.size());
 
 	}
-	
+
 	public Gender getGender() {
         return gender;
+    }
+
+	public int getMonthlySalary() {
+        return monthlySalary;
     }
 }
